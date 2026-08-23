@@ -1,6 +1,6 @@
 {
   "meta": {
-    "checkedAt": "2026-08-23T21:44:12+02:00",
+    "checkedAt": "2026-08-23T21:44:31+02:00",
     "sourceStatus": {
       "AKU100K": {
         "state": "ok",
@@ -59,7 +59,7 @@
       "failed": [
         "seniorer: JOBINDSATS_API_TOKEN mangler. GitHub-secretet API_ADGANG skal være tilgængeligt i repositoryet."
       ],
-      "checkedAt": "2026-08-23T21:44:12+02:00"
+      "checkedAt": "2026-08-23T21:44:31+02:00"
     }
   },
   "sections": {
