@@ -1,6 +1,6 @@
 {
   "meta": {
-    "checkedAt": "2026-08-23T19:17:06+02:00",
+    "checkedAt": "2026-08-23T21:27:34+02:00",
     "sourceStatus": {
       "AKU100K": {
         "state": "ok",
@@ -48,7 +48,7 @@
         "FRDK126"
       ],
       "failed": [],
-      "checkedAt": "2026-08-23T19:17:06+02:00"
+      "checkedAt": "2026-08-23T21:27:34+02:00"
     }
   },
   "sections": {
@@ -1060,15 +1060,15 @@
       ],
       "mix": [
         {
-          "label": "1. Deltidsbeskæftigede, der ønsker flere timer ",
+          "label": "1. Deltidsbeskæftigede, der ønsker flere timer",
           "value": 117.0
         },
         {
-          "label": "2. AKU-Ledige (søger arbejde, og kan starte med det samme) ",
+          "label": "2. AKU-Ledige (søger arbejde, og kan starte med det samme)",
           "value": 243.0
         },
         {
-          "label": "3. Søger arbejde, men kan ikke starte med det samme ",
+          "label": "3. Søger arbejde, men kan ikke starte med det samme",
           "value": 92.0
         },
         {
