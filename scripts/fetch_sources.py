@@ -72,7 +72,7 @@ def aku_current():
 def ras():
     meta=info('RAS200');area=variable(meta,['område']);origin=variable(meta,['herkomst']);age=variable(meta,['alder']);sex=variable(meta,['køn']);freq=variable(meta,['frekvens']);time=variable(meta,['år','tid'])
     sel={area['id']:[valcode(area,['hele landet','danmark'],True)],origin['id']:[valcode(origin,['i alt','total'],True)],age['id']:['*'],sex['id']:[valcode(sex,['i alt','total'],True)],freq['id']:['*'],time['id']:['*']}
-    rows=fetch_csv('RAS200',sel);ac=col(rows,['alder']);fc=col(rows,['frekvens']);tc=time_col(rows);vc=value_col(rows);g={}
+    rows=fetch_csv('RAS200',sel);ac=age['id'] if age['id'] in rows[0] else col(rows,['alder']);fc=freq['id'] if freq['id'] in rows[0] else col(rows,['frekvens','beregning']);tc=time['id'] if time['id'] in rows[0] else time_col(rows);vc=value_col(rows);g={}
     for r in rows:g.setdefault(r[tc],{}).setdefault(r[ac],{})[norm(r[fc])]=num(r[vc])
     years=sorted(g,key=period_key);latest=years[-1];ages=[a for a in g[latest] if 'alt' not in norm(a)]
     def emp(p,a):return next((v for k,v in g.get(p,{}).get(a,{}).items() if 'beskæftigelsesfrekvens' in k),None)
