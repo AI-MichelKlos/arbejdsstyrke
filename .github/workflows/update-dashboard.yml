@@ -1,17 +1,27 @@
 name: Opdater arbejdsstyrke-dashboard
 run-name: "Arbejdsstyrke - ${{ github.event_name }}"
+
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths: ["index.html","style.css","script.js","scripts/**",".github/workflows/update-dashboard.yml"]
+    branches:
+      - main
+    paths:
+      - "index.html"
+      - "style.css"
+      - "script.js"
+      - "scripts/**"
+      - ".github/workflows/update-dashboard.yml"
   schedule:
     - cron: "17 7-10 * * 2"
+
 permissions:
   contents: write
+
 concurrency:
   group: update-arbejdsstyrke
   cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -27,29 +37,25 @@ jobs:
         run: |
           mkdir -p status data
           set +e
-          python -m py_compile scripts/fetch_sources.py > status/run.log 2>&1
+          python -m py_compile scripts/fetch_sources.py scripts/validate.py > status/run.log 2>&1
           code=$?
-          if [ "$code" -eq 0 ]; then python scripts/fetch_sources.py >> status/run.log 2>&1; code=$?; fi
           if [ "$code" -eq 0 ]; then
-            python - <<'PY' >> status/run.log 2>&1
-import json
-p=json.load(open('data/dashboard-data.json',encoding='utf-8'))
-assert p['meta']['updateStatus']['state']=='ok'
-for key in ('AKU100K','AKU110K','AKU550K','FRDK126'):
-    assert p['meta']['sourceStatus'][key]['state']=='ok'
-assert len(p['sections']['main']['labels'])>20
-assert p['sections']['main']['kpi']['period']==p['sections']['main']['labels'][-1]
-assert len(p['sections']['age']['groups'])>=5
-assert p['sections']['reserve']['kpi']['total'] is not None
-assert p['sections']['projection']['labels']
-print('Validering ok')
-PY
+            python scripts/fetch_sources.py >> status/run.log 2>&1
             code=$?
           fi
+          if [ "$code" -eq 0 ]; then
+            python scripts/validate.py >> status/run.log 2>&1
+            code=$?
+          fi
+          set -e
           cat status/run.log || true
           today="$(TZ=Europe/Copenhagen date +'%F')"
           started="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          if [ "$code" -eq 0 ]; then printf 'status: ok\ntid_utc: %s\ndato_dk: %s\n' "$started" "$today" > status/last-run.txt; else printf 'status: fejl\ntid_utc: %s\ndato_dk: %s\n' "$started" "$today" > status/last-run.txt; fi
+          if [ "$code" -eq 0 ]; then
+            printf 'status: ok\ntid_utc: %s\ndato_dk: %s\n' "$started" "$today" > status/last-run.txt
+          else
+            printf 'status: fejl\ntid_utc: %s\ndato_dk: %s\n' "$started" "$today" > status/last-run.txt
+          fi
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
       - name: Kontroller publiceringsfiler
         if: steps.update.outputs.exit_code == '0'
@@ -62,7 +68,7 @@ PY
       - name: Gem data og status
         if: always()
         run: |
-          git add data/dashboard-data.json status/last-run.txt || true
+          git add data/dashboard-data.json status/last-run.txt 2>/dev/null || true
           if git diff --cached --quiet; then exit 0; fi
           git config user.name "Dashboard automation"
           git config user.email "dashboard-automation@users.noreply.github.com"
