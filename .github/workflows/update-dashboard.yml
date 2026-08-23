@@ -26,6 +26,8 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      JOBINDSATS_API_TOKEN: ${{ secrets.API_ADGANG }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,7 +39,7 @@ jobs:
         run: |
           mkdir -p status data
           set +e
-          python -m py_compile scripts/fetch_sources.py scripts/validate.py > status/run.log 2>&1
+          python -m py_compile scripts/jobindsats_api.py scripts/fetch_sources.py scripts/validate.py > status/run.log 2>&1
           code=$?
           if [ "$code" -eq 0 ]; then
             python scripts/fetch_sources.py >> status/run.log 2>&1
@@ -65,6 +67,8 @@ jobs:
           test -s script.js
           test -s data/dashboard-data.json
           grep -q 'Arbejdsstyrken i Danmark' index.html
+          grep -q 'RAS200' data/dashboard-data.json
+          grep -q 'seniorer' data/dashboard-data.json
       - name: Gem data og status
         if: always()
         run: |
