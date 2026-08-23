@@ -1,6 +1,6 @@
 {
   "meta": {
-    "checkedAt": "2026-08-23T21:44:31+02:00",
+    "checkedAt": "2026-08-23T21:51:57+02:00",
     "sourceStatus": {
       "AKU100K": {
         "state": "ok",
@@ -39,27 +39,26 @@
         "seasonalAdjustment": "ikke relevant"
       },
       "seniorer": {
-        "state": "missing",
+        "state": "ok",
         "source": "Jobindsats.dk / STAR",
-        "dataset": "Arbejdsmarkedsstatus for seniorer",
-        "latestPeriod": null,
+        "dataset": "snr_arbstatus",
+        "latestPeriod": "2026M06",
         "unit": "pct.",
         "seasonalAdjustment": "ikke relevant",
-        "error": "JOBINDSATS_API_TOKEN mangler. GitHub-secretet API_ADGANG skal være tilgængeligt i repositoryet."
+        "via": "AI-MichelKlos/Dashboard/data/senior-status.json"
       }
     },
     "updateStatus": {
-      "state": "partial",
+      "state": "ok",
       "successful": [
         "AKU100K",
         "RAS200",
         "LBESK104",
-        "FRDK126"
+        "FRDK126",
+        "seniorer"
       ],
-      "failed": [
-        "seniorer: JOBINDSATS_API_TOKEN mangler. GitHub-secretet API_ADGANG skal være tilgængeligt i repositoryet."
-      ],
-      "checkedAt": "2026-08-23T21:44:31+02:00"
+      "failed": [],
+      "checkedAt": "2026-08-23T21:51:57+02:00"
     }
   },
   "sections": {
@@ -901,8 +900,114 @@
       ]
     },
     "seniors": {
-      "period": null,
-      "items": []
+      "period": "2026M06",
+      "items": [
+        {
+          "age": 55,
+          "label": "55 år",
+          "employmentShare": 77.1
+        },
+        {
+          "age": 56,
+          "label": "56 år",
+          "employmentShare": 76.0
+        },
+        {
+          "age": 57,
+          "label": "57 år",
+          "employmentShare": 75.4
+        },
+        {
+          "age": 58,
+          "label": "58 år",
+          "employmentShare": 74.6
+        },
+        {
+          "age": 59,
+          "label": "59 år",
+          "employmentShare": 74.4
+        },
+        {
+          "age": 60,
+          "label": "60 år",
+          "employmentShare": 72.6
+        },
+        {
+          "age": 61,
+          "label": "61 år",
+          "employmentShare": 71.0
+        },
+        {
+          "age": 62,
+          "label": "62 år",
+          "employmentShare": 68.6
+        },
+        {
+          "age": 63,
+          "label": "63 år",
+          "employmentShare": 65.1
+        },
+        {
+          "age": 64,
+          "label": "64 år",
+          "employmentShare": 56.8
+        },
+        {
+          "age": 65,
+          "label": "65 år",
+          "employmentShare": 48.4
+        },
+        {
+          "age": 66,
+          "label": "66 år",
+          "employmentShare": 41.7
+        },
+        {
+          "age": 67,
+          "label": "67 år",
+          "employmentShare": 31.7
+        },
+        {
+          "age": 68,
+          "label": "68 år",
+          "employmentShare": 25.0
+        },
+        {
+          "age": 69,
+          "label": "69 år",
+          "employmentShare": 20.9
+        },
+        {
+          "age": 70,
+          "label": "70 år",
+          "employmentShare": 16.6
+        },
+        {
+          "age": 71,
+          "label": "71 år",
+          "employmentShare": 13.7
+        },
+        {
+          "age": 72,
+          "label": "72 år",
+          "employmentShare": 11.3
+        },
+        {
+          "age": 73,
+          "label": "73 år",
+          "employmentShare": 9.6
+        },
+        {
+          "age": 74,
+          "label": "74 år",
+          "employmentShare": 8.3
+        },
+        {
+          "age": 75,
+          "label": "75+ år",
+          "employmentShare": 3.2
+        }
+      ]
     }
   }
 }
