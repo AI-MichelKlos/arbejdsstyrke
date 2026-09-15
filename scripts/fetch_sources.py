@@ -90,13 +90,15 @@ def employees():
     return meta,{'labels':labels,'values':values,'kpi':{'period':labels[-1],'value':values[-1]}}
 
 def projection():
-    meta=info('FRDK126');age=variable(meta,['alder']);time=variable(meta,['år','tid']);sel={age['id']:['*'],time['id']:['*']}
-    for v in meta['variables']:
-        if v['id'] not in sel:sel[v['id']]=[valcode(v,['hele landet','i alt','total'],True)]
+    meta=info('FRDK126');origin=variable(meta,['herkomst']);sex=variable(meta,['køn']);age=variable(meta,['alder']);time=variable(meta,['år','tid'])
+    # FRDK126 har ingen totaler for herkomst og køn. Hent derfor alle kategorier og summer dem.
+    sel={origin['id']:['*'],sex['id']:['*'],age['id']:['*'],time['id']:['*']}
     rows=fetch_csv('FRDK126',sel);vc=value_col(rows);ac=col(rows,['alder']);tc=time_col(rows);g={}
     for r in rows:
         m=re.search(r'(\d+)',r[ac]);y=re.search(r'(\d{4})',r[tc]);v=num(r[vc])
-        if m and y and v is not None:g.setdefault(int(y.group(1)),{})[int(m.group(1))]=v
+        if m and y and v is not None:
+            year=int(y.group(1));years_age=g.setdefault(year,{})
+            years_age[int(m.group(1))]=years_age.get(int(m.group(1)),0)+v
     years=[y for y in sorted(g) if y<=2035];tot=lambda y,a,b:sum(v for ag,v in g[y].items() if a<=ag<=b)
     return meta,{'labels':[str(y) for y in years],'age2064':[tot(y,20,64) for y in years],'age2069':[tot(y,20,69) for y in years],'age6574':[tot(y,65,74) for y in years]}
 
