@@ -68,7 +68,7 @@ jobs:
           test -s style.css
           test -s script.js
           test -s data/dashboard-data.json
-          grep -q 'Arbejdsstyrken i Danmark' index.html
+          grep -q 'Seniorer på arbejdsmarkedet' index.html
           grep -q 'RAS200' data/dashboard-data.json
           grep -q '"seniorer"' data/dashboard-data.json
           grep -q '"state": "ok"' data/dashboard-data.json
