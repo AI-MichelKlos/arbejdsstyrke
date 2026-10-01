@@ -1,6 +1,6 @@
 {
   "meta": {
-    "checkedAt": "2026-09-29T16:03:53+02:00",
+    "checkedAt": "2026-10-01T21:55:12+02:00",
     "sourceStatus": {
       "AKU100K": {
         "state": "ok",
@@ -58,7 +58,7 @@
         "seniorer"
       ],
       "failed": [],
-      "checkedAt": "2026-09-29T16:03:53+02:00"
+      "checkedAt": "2026-10-01T21:55:12+02:00"
     }
   },
   "sections": {
