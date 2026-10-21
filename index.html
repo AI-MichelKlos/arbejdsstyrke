@@ -24,7 +24,7 @@
   const sum = vals => vals.length && vals.every(valid) ? vals.reduce((a,b)=>a+b,0) : null;
   const ratio = (a,b) => valid(a)&&valid(b)&&b>0 ? a/b*100 : null;
   const cache = new Map(), cubes = new Map(), charts = new Map();
-  let meta, geometry, zoom, svg, layer, path, currentMap, previousMap, revision=0;
+  let meta, geometry, zoom, svg, layer, path, currentMap, previousMap, revision=0, mapArea='dk';
   let state = {area:'dk',compare:'',age:'60-64',period:'',baseline:'',mapmetric:'share',trendmetric:'share'};
   function getJSON(name) {
     const url = DATA_ROOT + name + '?v=' + encodeURIComponent(meta?.meta.checkedAt || Date.now());
@@ -51,21 +51,22 @@
   const snapshotMeasures = (snapshot,id) => measures(snapshot?.[id],true);
   function mapValue(id) {
     const a=snapshotMeasures(currentMap,id);
+    if(state.mapmetric==='count')return a.employed;
     if(state.mapmetric==='change'){
       const b=snapshotMeasures(previousMap,id);
       return valid(a.share)&&valid(b.share)?a.share-b.share:null;
     }
     return state.mapmetric==='pension'?a.pensionShare:state.mapmetric==='degree'?a.degree:a.share;
   }
-  const mapMetricName = () => ({share:'Andel med lønmodtagerjob',change:'Ændring i andelen med lønmodtagerjob',pension:'Andel med job og folkepension',degree:'Gennemsnitlig beskæftigelsesgrad'})[state.mapmetric];
-  const mapFormat = v => state.mapmetric==='change' ? valid(v)?(v>0?'+':'')+fmt(v,true)+' procentpoint':'Ikke tilgængelig' : pct(v);
+  const mapMetricName = () => ({share:'Andel med lønmodtagerjob',count:'Gennemsnitligt antal med job',change:'Ændring i andelen med lønmodtagerjob',pension:'Andel med job og folkepension',degree:'Gennemsnitlig beskæftigelsesgrad'})[state.mapmetric];
+  const mapFormat = v => state.mapmetric==='count'?fmt(v):state.mapmetric==='change' ? valid(v)?(v>0?'+':'')+fmt(v,true)+' procentpoint':'Ikke tilgængelig' : pct(v);
   function option(value,text){const o=document.createElement('option');o.value=value;o.textContent=text;return o;}
   function setOptions(id,values,selected){$(id).replaceChildren(...values.map(([v,t])=>option(v,t)));$(id).value=selected;$(id).disabled=false;}
-  function selectedAreas(){return [...new Set([state.area,'dk',state.compare].filter(Boolean))];}
+  function selectedAreas(){return ['dk'];}
   function areaColor(id){return id==='dk'?C.brown:id===state.area?C.cognac:C.blue;}
-  function context(){return selectedAreas().map(areaName).join(' / ')+' · '+periodName(state.period);}
+  function context(){return 'Hele landet · '+periodName(state.period);}
   function renderKpis(){
-    const a=m(state.area), prior=meta.periods[periodIndex(state.period)-12], b=prior?m(state.area,prior):null;
+    const a=m('dk'), prior=meta.periods[periodIndex(state.period)-12], b=prior?m(state.area,prior):null;
     $('selection').textContent=areaName(state.area)+' · '+ageLabel(state.age);
     $('k-share').textContent=pct(a.share);
     $('k-share-sub').textContent=periodName(state.period)+(b&&valid(b.share)&&valid(a.share)?' · '+(a.share-b.share>0?'+':'')+fmt(a.share-b.share,true)+' procentpoint på et år':'');
@@ -159,12 +160,12 @@
     if(change){const max=Math.max(Math.abs(lo),Math.abs(hi),.1);lo=-max;hi=max;}else if(lo===hi){lo=0;hi=Math.max(hi,1);}
     const interp=change?d3.interpolateRgbBasis([C.blue,'#F7F1EA',C.cognac]):d3.interpolateRgb('#EFE4D6',C.cognac);
     const scale=d3.scaleSequential(interp).domain([lo,hi]);
-    layer.selectAll('path').attr('fill',f=>valid(mapValue(f.areaId))?scale(mapValue(f.areaId)):'#DDD8D2').classed('selected',f=>f.areaId===state.area||f.areaId===state.compare).attr('aria-label',f=>areaName(f.areaId)+': '+mapFormat(mapValue(f.areaId))+'. Vælg kommune.');
+    layer.selectAll('path').attr('fill',f=>valid(mapValue(f.areaId))?scale(mapValue(f.areaId)):'#DDD8D2').classed('selected',f=>f.areaId===mapArea).attr('aria-label',f=>areaName(f.areaId)+': '+mapFormat(mapValue(f.areaId))+'. Vælg kommune.');
     $('map-title').textContent='Figur 1: '+mapMetricName()+' i kommunerne';
-    $('map-sub').textContent=ageLabel(state.age)+' · '+periodName(state.period)+(change?' sammenlignet med '+periodName(state.baseline):'');
+    $('map-sub').textContent=ageLabel(state.age)+' · gennemsnit for de seneste 12 afsluttede måneder';
     const legend=$('map-legend');legend.replaceChildren(document.createTextNode(mapFormat(lo)));const gradient=document.createElement('span');gradient.className='gradient';gradient.style.background='linear-gradient(to right,'+interp(0)+','+interp(.5)+','+interp(1)+')';legend.append(gradient,document.createTextNode(mapFormat(hi)));const dot=document.createElement('span');dot.className='missing-dot';legend.append(dot,document.createTextNode('Manglende data'));
-    const a=m(state.area),v=mapValue(state.area),dk=mapValue('dk');
-    $('detail-name').textContent=areaName(state.area);$('detail-value').textContent=mapFormat(v);
+    const a=snapshotMeasures(currentMap,mapArea),v=mapValue(mapArea),dk=mapValue('dk');
+    $('detail-name').textContent=areaName(mapArea);$('detail-value').textContent=mapFormat(v);
     if(change&&valid(v)){
       $('detail-value').textContent=(v>0?'+':'')+fmt(v,true);
       const unit=document.createElement('span');unit.className='detail-unit';unit.textContent='procentpoint';$('detail-value').append(unit);
@@ -172,24 +173,41 @@
     $('detail-description').textContent=mapMetricName()+' · '+ageLabel(state.age);
     const items=[['Hele landet',mapFormat(dk)],['Personer med lønmodtagerjob',fmt(a.employed)],['Befolkningen i aldersgruppen',fmt(a.n)],['Job og folkepension, personer',fmt(a.pension)]];
     const dl=$('detail-stats');dl.replaceChildren();items.forEach(([k,v])=>{const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=k;dd.textContent=v;dl.append(dt,dd);});
-    $('table-caption').textContent=ageLabel(state.age)+' · '+periodName(state.period)+'. Manglende tal vises som Ikke tilgængelig.';
+    $('table-caption').textContent=ageLabel(state.age)+' · 12-månedersgennemsnit. Manglende tal vises som Ikke tilgængelig.';
     const table=$('municipal-table');table.replaceChildren();
     [...meta.areas].sort((a,b)=>a.id==='dk'?-1:b.id==='dk'?1:a.name.localeCompare(b.name,'da')).forEach(area=>{
       const d=snapshotMeasures(currentMap,area.id);const tr=document.createElement('tr');const td=document.createElement('td'),b=document.createElement('button');b.textContent=area.name;b.onclick=()=>chooseArea(area.id);td.append(b);tr.append(td);
       [fmt(d.n),fmt(d.employed),fmt(d.share,true),fmt(d.pension),fmt(d.degree,true)].forEach(v=>{const cell=document.createElement('td');cell.textContent=v;tr.append(cell);});table.append(tr);
     });
   }
-  function updateURL(){const params=new URLSearchParams();Object.entries(state).forEach(([k,v])=>{if(v)params.set(k,v);});history.replaceState(null,'','?'+params.toString());}
+  function updateURL(){const params=new URLSearchParams();Object.entries({...state,area:mapArea}).forEach(([k,v])=>{if(v)params.set(k,v);});history.replaceState(null,'','?'+params.toString());}
   async function loadCube(id){if(!id||cubes.has(id))return;const cube=await getJSON('senior-dashboard-area-'+id+'.json');if(cube.length!==meta.periods.length)throw new Error('Datafilens perioder passer ikke til metadata. Prøv at genindlæse siden om lidt.');cubes.set(id,cube);}
-  async function update(){
+  function rollingSnapshot(months){
+  const out={};
+  for(const a of meta.areas){
+    const slices=months.map(x=>x?.[a.id]);
+    if(slices.some(x=>!Array.isArray(x))){out[a.id]=[];continue;}
+    out[a.id]=meta.ages.map((_,i)=>{
+      const rows=slices.map(s=>s?.[i]);
+      if(rows.some(r=>!r))return [null,null,null,null];
+      const mean=k=>{const v=rows.map(r=>r[k]);return v.every(valid)?v.reduce((x,y)=>x+y,0)/v.length:null;};
+      const weight=rows.map(r=>r[1]),degree=rows.map(r=>r[3]);
+      const den=weight.reduce((x,y)=>x+y,0);
+      const d=weight.every(valid)&&degree.every(valid)&&den>0?degree.reduce((x,y,j)=>x+y*weight[j],0)/den:null;
+      return [mean(0),mean(1),mean(2),d];
+    });
+  }
+  return out;
+}
+async function update(){
     const turn=++revision;root.querySelector('main').setAttribute('aria-busy','true');$('message').textContent='Indlæser den valgte visning...';
     try{
-      const all=await Promise.all([Promise.all(selectedAreas().map(loadCube)),getJSON('senior-dashboard-map-'+state.period+'.json'),getJSON('senior-dashboard-map-'+state.baseline+'.json')]);
-      if(turn!==revision)return;currentMap=all[1];previousMap=all[2];renderKpis();renderCharts();if(layer)renderMap();updateURL();$('message').textContent='';
+      const ps=meta.periods.slice(-12);const all=await Promise.all([Promise.all(selectedAreas().map(loadCube)),Promise.all(ps.map(p=>getJSON('senior-dashboard-map-'+p+'.json')))]);
+      if(turn!==revision)return;currentMap=rollingSnapshot(all[1]);previousMap=null;renderKpis();renderCharts();if(layer)renderMap();updateURL();$('message').textContent='';
     }catch(e){if(turn===revision)$('message').textContent='Visningen kunne ikke opdateres. '+e.message;console.error(e);}
     finally{if(turn===revision)root.querySelector('main').setAttribute('aria-busy','false');}
   }
-  function chooseArea(id){state.area=id;$('area').value=id;$('map-tooltip').hidden=true;update();}
+  function chooseArea(id){mapArea=id;$('area').value=id;$('map-tooltip').hidden=true;if(layer)renderMap();updateURL();}
   function downloadCSV(){
     const ids=selectedAreas(),rows=[['Område','Periode','Alder','Befolkning','Personer med lønmodtagerjob','Andel med lønmodtagerjob, pct.','Beskæftigelsesgrad, pct.','Job og folkepension, personer','Job og egen pension, personer','Job og efterløn/fleksydelse, personer']];
     ids.forEach(id=>meta.periods.slice(0,periodIndex(state.period)+1).forEach(p=>{const a=m(id,p),r=cubes.get(id)[periodIndex(p)];rows.push([areaName(id),p,ageLabel(state.age),a.n,a.employed,a.share,a.degree,a.pension,total(r,7),total(r,4)]);}));
@@ -202,18 +220,18 @@
       if(typeof Chart==='undefined')throw new Error('Grafbiblioteket kunne ikke indlæses.');
       meta=await getJSON('senior-dashboard.json');
       const q=new URLSearchParams(location.search);Object.keys(state).forEach(k=>{if(q.has(k))state[k]=q.get(k);});
-      const ids=new Set(meta.areas.map(a=>a.id));if(!ids.has(state.area))state.area='dk';if(!ids.has(state.compare))state.compare='';
+      const ids=new Set(meta.areas.map(a=>a.id));if(!ids.has(state.area))state.area='dk';mapArea=state.area;state.area='dk';state.compare='';if(!ids.has(state.compare))state.compare='';
       if(!meta.periods.includes(state.period))state.period=meta.meta.latestPeriod;
       if(!meta.periods.includes(state.baseline)){const old=(+state.period.slice(0,4)-5)+state.period.slice(4);state.baseline=meta.periods.includes(old)?old:meta.periods[0];}
       if(!/^\d{2}-\d{2}$/.test(state.age)||indices(state.age).length<1||indices(state.age).some(i=>i<0||i>20))state.age='60-64';
-      if(!['share','change','pension','degree'].includes(state.mapmetric))state.mapmetric='share';if(!['share','count'].includes(state.trendmetric))state.trendmetric='share';
+      if(!['share','count','pension','degree'].includes(state.mapmetric))state.mapmetric='share';if(!['share','count'].includes(state.trendmetric))state.trendmetric='share';
       for(let a=55;a<=74;a++)$('age').append(option(a+'-'+a,a+' år'));
       if(![...$('age').options].some(o=>o.value===state.age))$('age').append(option(state.age,ageLabel(state.age)));
       const areaOptions=meta.areas.map(a=>[a.id,a.name]);setOptions('area',areaOptions,state.area);setOptions('compare',[['','Ingen'],...areaOptions.filter(([id])=>id!=='dk')],state.compare);
       const periodOptions=[...meta.periods].reverse().map(p=>[p,periodName(p)]);setOptions('period',periodOptions,state.period);setOptions('baseline',periodOptions,state.baseline);
       ['age','mapmetric','trendmetric'].forEach(k=>$(k).value=state[k]);
-      Object.keys(state).forEach(k=>$(k).addEventListener('change',()=>{state[k]=$(k).value;update();}));
-      $('reset').onclick=()=>{state={area:'dk',compare:'',age:'60-64',period:meta.meta.latestPeriod,baseline:meta.periods[Math.max(0,meta.periods.length-61)],mapmetric:'share',trendmetric:'share'};Object.entries(state).forEach(([k,v])=>$(k).value=v);update();};
+      Object.keys(state).filter(k=>!['area','compare','period','baseline'].includes(k)).forEach(k=>$(k).addEventListener('change',()=>{state[k]=$(k).value;update();}));
+      $('reset').onclick=()=>{mapArea='dk';state={area:'dk',compare:'',age:'60-64',period:meta.meta.latestPeriod,baseline:meta.periods[Math.max(0,meta.periods.length-61)],mapmetric:'share',trendmetric:'share'};Object.entries(state).forEach(([k,v])=>$(k).value=v);update();};
       $('csv').onclick=downloadCSV;$('share').onclick=async()=>{try{await navigator.clipboard.writeText(location.href);$('message').textContent='Linket til dine valg er kopieret.';}catch{$('message').textContent='Kopiér adressen fra browserens adresselinje for at dele disse valg.';}};
       $('updated').textContent='Seneste opgørelsesmåned: '+periodName(meta.meta.latestPeriod)+' · Tal kontrolleret '+new Date(meta.meta.checkedAt).toLocaleDateString('da-DK');
       $('data-date').textContent='Kilde: Jobindsats.dk (STAR), snr_arbstatus. Historik: '+periodName(meta.periods[0])+' til '+periodName(meta.meta.latestPeriod)+'. Grafik og databehandling: Danske A-kasser.';
@@ -225,17 +243,17 @@
   init();
 })();
 
-});</script></head>
+});</script><style>#senior-dashboard .filters .control:has(#area),#senior-dashboard .filters .control:has(#compare),#senior-dashboard .filters .control:has(#period),#senior-dashboard .control:has(#baseline){display:none}#senior-dashboard .map-card{margin-top:22px}#senior-dashboard .map-layout{grid-template-columns:minmax(0,1.7fr) minmax(250px,1fr)}</style></head>
 <body><div id="senior-dashboard"><nav class="navigation"><a href="https://ai-michelklos.github.io/arbejdsmarked/">Arbejdsmarkedet i tal</a><a href="https://ai-michelklos.github.io/arbejdsstyrke/">Baggrund: RAS og arbejdsstyrken</a></nav>
-<header class="hero"><div class="wrap"><p class="eyebrow">Arbejdsmarkedet i tal / seniorer</p><h1>Seniorer på arbejdsmarkedet</h1><p class="lead">Følg lønmodtagerjob, pension og arbejdets omfang fra 55 år. Vælg en kommune på kortet og sammenlign med hele landet.</p><p class="byline">Udarbejdet af Michel Klos</p><p id="updated" class="updated">Indlæser officielle data...</p></div></header>
+<header class="hero"><div class="wrap"><p class="eyebrow">Arbejdsmarkedet i tal / seniorer</p><h1>Seniorer på arbejdsmarkedet</h1><p class="lead">Sammenlign alle kommuner på de seneste 12 måneder, og følg den nationale udvikling i graferne nedenunder.</p><p class="byline">Udarbejdet af Michel Klos</p><p id="updated" class="updated">Indlæser officielle data...</p></div></header>
 <main class="wrap"><div id="message" class="message" role="status" aria-live="polite">Henter data fra Jobindsats.</div>
-<section class="card filters" aria-label="Vælg data"><div class="control"><label for="area">Område</label><select id="area" disabled><option>Hele landet</option></select></div><div class="control"><label for="compare">Sammenlign kommune</label><select id="compare" disabled><option>Ingen</option></select></div><div class="control"><label for="age">Alder</label><select id="age"><option value="60-64" selected>60-64 år</option><option value="55-59">55-59 år</option><option value="65-69">65-69 år</option><option value="70-74">70-74 år</option><option value="67-74">67-74 år</option><option value="55-74">55-74 år</option><option value="75-75">75+ år</option></select></div><div class="control"><label for="period">Opgørelsesmåned</label><select id="period" disabled></select></div><button id="reset" type="button">Nulstil valg</button><div class="filter-note">Hele landet vises altid som sammenligning. Alder og måned gælder kortet og nøgletallene. Aldersgraferne viser alle alderstrin.</div></section>
+<section class="card filters" aria-label="Vælg data"><div class="control"><label for="area">Område</label><select id="area" disabled><option>Hele landet</option></select></div><div class="control"><label for="compare">Sammenlign kommune</label><select id="compare" disabled><option>Ingen</option></select></div><div class="control"><label for="age">Alder</label><select id="age"><option value="60-64" selected>60-64 år</option><option value="55-59">55-59 år</option><option value="65-69">65-69 år</option><option value="70-74">70-74 år</option><option value="67-74">67-74 år</option><option value="55-74">55-74 år</option><option value="75-75">75+ år</option></select></div><div class="control"><label for="period">Opgørelsesmåned</label><select id="period" disabled></select></div><button id="reset" type="button">Nulstil valg</button><div class="filter-note">Kortet viser 12-månedersgennemsnit. Tidsserierne nedenunder gælder kun hele landet.</div></section>
 <div class="selection-line"><h2 id="selection">Hele landet</h2><div class="actions"><button id="share" type="button">Kopiér link til visningen</button><button id="csv" type="button">Hent tal som CSV</button></div></div>
 <section class="kpis" aria-label="Nøgletal"><article class="card kpi"><p class="kicker">Med lønmodtagerjob</p><strong id="k-share">...</strong><p id="k-share-sub"></p></article><article class="card kpi"><p class="kicker">Personer med lønmodtagerjob</p><strong id="k-count">...</strong><p id="k-count-sub"></p></article><article class="card kpi"><p class="kicker">Arbejdets omfang</p><strong id="k-degree">...</strong><p id="k-degree-sub"></p></article><article class="card kpi"><p class="kicker" id="k-pension-label">Job og pension</p><strong id="k-pension">...</strong><p id="k-pension-sub"></p></article></section>
-<section class="card map-card" aria-labelledby="map-title"><div class="card-heading"><div><p class="kicker">Geografiske forskelle</p><h2 id="map-title">Figur 1: Lønmodtagerjob blandt seniorer i kommunerne</h2><p id="map-sub" class="subtitle"></p></div><div class="control"><label for="mapmetric">Kortet viser</label><select id="mapmetric"><option value="share">Andel med lønmodtagerjob</option><option value="change">Ændring i andelen med job</option><option value="pension">Andel med job og folkepension</option><option value="degree">Gennemsnitlig beskæftigelsesgrad</option></select></div><div class="control"><label for="baseline">Sammenlign med</label><select id="baseline" disabled></select></div></div>
+<section class="card map-card" aria-labelledby="map-title"><div class="card-heading"><div><p class="kicker">DEL 1 · Geografiske forskelle</p><h2 id="map-title">Figur 1: Lønmodtagerjob blandt seniorer i kommunerne</h2><p id="map-sub" class="subtitle"></p></div><div class="control"><label for="mapmetric">Kortet viser</label><select id="mapmetric"><option value="share">Andel med lønmodtagerjob</option><option value="count">Gennemsnitligt antal personer i job</option><option value="pension">Andel med job og folkepension</option><option value="degree">Gennemsnitlig beskæftigelsesgrad</option></select></div><div class="control"><label for="baseline">Sammenlign med</label><select id="baseline" disabled></select></div></div>
 <div class="map-layout"><div class="map-box"><div class="map-actions"><button id="zoom-in" aria-label="Zoom ind på kortet">+</button><button id="zoom-out" aria-label="Zoom ud på kortet">−</button><button id="zoom-reset">Nulstil kort</button></div><svg id="map" viewBox="0 0 750 610" role="group" aria-label="Klikbart Danmarkskort med alle 98 kommuner"></svg><div id="map-legend" class="map-legend"></div><p class="small">Klik eller tryk på en kommune. Du kan også vælge kommunen i feltet Område.</p></div><aside class="map-detail"><p class="kicker">Valgt område</p><h3 id="detail-name">Hele landet</h3><p id="detail-value" class="detail-value"></p><p id="detail-description"></p><dl id="detail-stats"></dl><p class="small">Kortet viser bopælskommune, ikke arbejdssted. Kommuneforskelle kan også afspejle alderssammensætning og andre forskelle mellem borgerne.</p></aside></div><p class="source">Kilde: Jobindsats.dk (STAR), Arbejdsmarkedsstatus for seniorer, snr_arbstatus. Kortgrundlag: <a href="https://github.com/magnuslarsen/geoJSON-Danish-municipalities">GeoJSON Danish municipalities</a>. Grafik og databehandling: Danske A-kasser.</p></section>
-<div class="chart-grid"><article class="card"><p class="kicker">Aldersprofil</p><h2 id="age-title">Figur 2: Andel med lønmodtagerjob efter alder</h2><p class="subtitle chart-context"></p><div class="chart"><canvas id="age-chart" role="img" aria-label="Andel med lønmodtagerjob efter alder"></canvas></div><p class="small">Aldersprofilen sammenligner forskellige personer i samme måned. Den følger ikke den enkelte persons tilbagetrækning.</p><p class="source">Kilde: Jobindsats.dk (STAR), snr_arbstatus. Grafik og databehandling: Danske A-kasser.</p></article>
-<article class="card"><div class="card-heading"><div><p class="kicker">Udviklingen siden 2010</p><h2 id="trend-title">Figur 3: Seniorernes lønmodtagerjob over tid</h2></div><div class="control"><label for="trendmetric">Måltal</label><select id="trendmetric"><option value="share">Andel af aldersgruppen</option><option value="count">Antal personer</option></select></div></div><p id="trend-sub" class="subtitle"></p><div class="chart"><canvas id="trend-chart" role="img" aria-label="Seniorernes lønmodtagerjob over tid"></canvas></div><p class="small">Ikke sæsonkorrigeret. Sammenlign gerne samme måned på tværs af år.</p><p class="source">Kilde: Jobindsats.dk (STAR), snr_arbstatus. Grafik og databehandling: Danske A-kasser.</p></article>
+<div class="chart-grid"><article class="card"><p class="kicker">DEL 2 · Hele Danmark · Aldersprofil</p><h2 id="age-title">Figur 2: Andel med lønmodtagerjob efter alder</h2><p class="subtitle chart-context"></p><div class="chart"><canvas id="age-chart" role="img" aria-label="Andel med lønmodtagerjob efter alder"></canvas></div><p class="small">Aldersprofilen sammenligner forskellige personer i samme måned. Den følger ikke den enkelte persons tilbagetrækning.</p><p class="source">Kilde: Jobindsats.dk (STAR), snr_arbstatus. Grafik og databehandling: Danske A-kasser.</p></article>
+<article class="card"><div class="card-heading"><div><p class="kicker">Hele Danmark · Udviklingen siden 2010</p><h2 id="trend-title">Figur 3: Seniorernes lønmodtagerjob over tid</h2></div><div class="control"><label for="trendmetric">Måltal</label><select id="trendmetric"><option value="share">Andel af aldersgruppen</option><option value="count">Antal personer</option></select></div></div><p id="trend-sub" class="subtitle"></p><div class="chart"><canvas id="trend-chart" role="img" aria-label="Seniorernes lønmodtagerjob over tid"></canvas></div><p class="small">Ikke sæsonkorrigeret. Sammenlign gerne samme måned på tværs af år.</p><p class="source">Kilde: Jobindsats.dk (STAR), snr_arbstatus. Grafik og databehandling: Danske A-kasser.</p></article>
 <article class="card"><p class="kicker">Arbejde kombineret med pension</p><h2 id="pension-title">Figur 4: Job og pension i samme måned</h2><p id="pension-sub" class="subtitle"></p><div class="chart"><canvas id="pension-chart" role="img" aria-label="Antal med job og pension i samme måned"></canvas></div><p class="small">Tre særskilte statuskategorier. Job og folkepension er noget andet end at være over folkepensionsalderen.</p><p class="source">Kilde: Jobindsats.dk (STAR), snr_arbstatus. Grafik og databehandling: Danske A-kasser.</p></article>
 <article class="card"><p class="kicker">Arbejdets omfang</p><h2 id="degree-title">Figur 5: Beskæftigelsesgrad blandt seniorer med job</h2><p class="subtitle chart-context"></p><div class="chart"><canvas id="degree-chart" role="img" aria-label="Gennemsnitlig beskæftigelsesgrad efter alder"></canvas></div><p class="small">Gennemsnit blandt personer med ordinært lønmodtagerjob inklusive fleksjob. 100 pct. svarer til fuldtid. Figuren viser et gennemsnit, ikke fordelingen på fuldtid og deltid.</p><p class="source">Kilde: Jobindsats.dk (STAR), snr_arbstatus. Grafik og databehandling: Danske A-kasser.</p></article>
 <article class="card wide"><p class="kicker">Seniorernes samlede status</p><h2 id="status-title">Figur 6: Arbejdsmarkedsstatus efter alder</h2><p id="status-sub" class="subtitle"></p><div class="chart status-chart"><canvas id="status-chart" role="img" aria-label="Arbejdsmarkedsstatus efter alder, stablet til 100 pct."></canvas></div><p class="small">Kategorierne overlapper ikke. Lønmodtagerjob omfatter også job kombineret med pension. Afrundede andele kan afvige fra 100 pct. Hvis en kategori er diskretioneret, vises hele alderssøjlen som manglende data.</p><p class="source">Kilde: Jobindsats.dk (STAR), snr_arbstatus. Grafik og databehandling: Danske A-kasser.</p></article></div>
