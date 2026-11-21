@@ -6,6 +6,8 @@ on:
       - 'index.html'
       - 'scripts/generate-share-previews.cjs'
       - 'assets/chart-linkedin.js'
+      - 'assets/editorial-design.css'
+      - 'assets/editorial-design.js'
       - 'share/**/index.html'
       - '.github/workflows/social-previews.yml'
   schedule:
