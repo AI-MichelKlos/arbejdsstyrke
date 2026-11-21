@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-11-21T20:53:15.862Z",
+  "dashboard": "Seniorer på arbejdsmarkedet",
+  "real": 6,
+  "fallback": 0,
+  "files": [
+    {
+      "id": "map",
+      "real": true,
+      "bytes": 109723
+    },
+    {
+      "id": "age-chart",
+      "real": true,
+      "bytes": 84268
+    },
+    {
+      "id": "trend-chart",
+      "real": true,
+      "bytes": 75204
+    },
+    {
+      "id": "pension-chart",
+      "real": true,
+      "bytes": 90503
+    },
+    {
+      "id": "degree-chart",
+      "real": true,
+      "bytes": 75953
+    },
+    {
+      "id": "status-chart",
+      "real": true,
+      "bytes": 137642
+    }
+  ]
+}
