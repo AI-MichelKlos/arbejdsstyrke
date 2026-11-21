@@ -1,0 +1,32 @@
+name: Validate senior age selection
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'index.html'
+      - 'scripts/test-senior-age.cjs'
+      - '.github/workflows/senior-age-validation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: senior-age-validation
+  cancel-in-progress: true
+jobs:
+  browser-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start dashboard locally
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/senior-serve.log 2>&1 &
+          sleep 2
+      - name: Verify all age groups and pension KPIs
+        run: node scripts/test-senior-age.cjs
