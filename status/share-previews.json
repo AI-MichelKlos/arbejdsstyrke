@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T21:01:20.001Z",
+  "generatedAt": "2026-11-21T22:31:08.689Z",
   "dashboard": "Seniorer på arbejdsmarkedet",
   "real": 6,
   "fallback": 0,
@@ -7,32 +7,32 @@
     {
       "id": "map",
       "real": true,
-      "bytes": 109723
+      "bytes": 110017
     },
     {
       "id": "age-chart",
       "real": true,
-      "bytes": 84268
+      "bytes": 83479
     },
     {
       "id": "trend-chart",
       "real": true,
-      "bytes": 75204
+      "bytes": 75161
     },
     {
       "id": "pension-chart",
       "real": true,
-      "bytes": 90503
+      "bytes": 88236
     },
     {
       "id": "degree-chart",
       "real": true,
-      "bytes": 75953
+      "bytes": 75231
     },
     {
       "id": "status-chart",
       "real": true,
-      "bytes": 137642
+      "bytes": 135880
     }
   ]
 }
