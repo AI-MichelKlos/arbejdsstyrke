@@ -47,7 +47,11 @@ console.log('Embedded JavaScript and attribution syntax checks passed');
     assert(older.pensionFolk!=='Ikke tilgængelig','67-74 folk-pension should be calculable with complete input');
     await view('55-74','55-74 år');
     await view('75-75','75+ år');
-    assert((await page.locator('#map-sub').textContent()).includes('12-månedersgennemsnit'),'Map must explain its reference period');
+    await page.waitForFunction(()=>document.querySelector('#map-sub')?.textContent.includes('12-månedersgennemsnit')||document.querySelector('#message')?.textContent.includes('Kortet kunne ikke indlæses'),null,{timeout:45000});
+    const mapText=await page.locator('#map-sub').textContent();
+    const mapStatus=await page.locator('#message').textContent();
+    console.log('Map context:',mapText,'Status:',mapStatus);
+    assert(mapText.includes('12-månedersgennemsnit'),'Map must explain its reference period; status: '+mapStatus);
     assert(!failures.length,'Browser errors: '+failures.join(' | '));
     console.log('Senior dashboard age tests passed');
   }finally{await browser.close();}
