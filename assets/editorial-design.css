@@ -522,3 +522,15 @@ body > header{
     max-width:calc(100% - clamp(90px, 18vw, 132px))!important;
   }
 }
+
+/* Senior mobile chart canvas width guard: Chart.js occasionally writes
+   a fixed 300px inline width, even inside a narrower chart card. */
+@media(max-width:390px){
+  #senior-dashboard .chart-grid .card,
+  #senior-dashboard .chart{min-width:0!important;max-width:100%!important;}
+  #senior-dashboard .chart canvas{
+    display:block;
+    max-width:100%!important;
+    width:100%!important;
+  }
+}
