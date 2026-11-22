@@ -50,6 +50,12 @@ for(const f of ['assets/editorial-wave.svg','assets/editorial-design.css','asset
   assert(report.navBeforeHeader,'Navigation should precede hero');
   assert(report.links.length===4,'Expected four dashboard links, got '+report.links);
   assert(report.cards>=EXPECTED,'Expected preserved graphs '+EXPECTED+' got '+report.cards);
+  if(report.scrollWidth>report.width+2){
+    const offenders=await page.evaluate(()=>Array.from(document.querySelectorAll('body *')).map(el=>{
+      const r=el.getBoundingClientRect();return{tag:el.tagName,cls:String(el.className||'').slice(0,90),id:el.id,left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width)};
+    }).filter(x=>x.right>innerWidth+2 && x.width>1).sort((a,b)=>b.right-a.right).slice(0,18));
+    console.error('MOBILE OVERFLOW OFFENDERS',width,JSON.stringify(offenders));
+  }
   assert(report.scrollWidth<=report.width+2,'Mobile horizontal overflow at '+width+': '+report.scrollWidth);
   const button=page.locator('.mk-cross-dashboard .mk-menu-toggle');
   if(width<=760){
