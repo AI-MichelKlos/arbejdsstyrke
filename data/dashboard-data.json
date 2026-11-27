@@ -1,13 +1,13 @@
 {
   "meta": {
-    "checkedAt": "2026-11-24T19:52:35+01:00",
+    "checkedAt": "2026-11-27T10:46:35+01:00",
     "sourceStatus": {
       "AKU100K": {
         "state": "ok",
         "source": "Danmarks Statistik",
         "dataset": "AKU100K",
-        "latestPeriod": "2026K2",
-        "sourceUpdated": "2026-08-24T08:00:00",
+        "latestPeriod": "2026K3",
+        "sourceUpdated": "2026-11-25T08:00:00",
         "unit": "1.000 personer",
         "seasonalAdjustment": "sæsonkorrigeret"
       },
@@ -15,8 +15,8 @@
         "state": "ok",
         "source": "Danmarks Statistik",
         "dataset": "RAS200",
-        "latestPeriod": "2024",
-        "sourceUpdated": "2025-11-18T08:00:00",
+        "latestPeriod": "2025",
+        "sourceUpdated": "2026-11-26T08:00:00",
         "unit": "pct.",
         "seasonalAdjustment": "ikke relevant"
       },
@@ -58,7 +58,7 @@
         "seniorer"
       ],
       "failed": [],
-      "checkedAt": "2026-11-24T19:52:35+01:00"
+      "checkedAt": "2026-11-27T10:46:35+01:00"
     }
   },
   "sections": {
@@ -137,7 +137,8 @@
         "2025K3",
         "2025K4",
         "2026K1",
-        "2026K2"
+        "2026K2",
+        "2026K3"
       ],
       "employed": [
         2751.0,
@@ -201,19 +202,20 @@
         2882.0,
         2886.0,
         2891.0,
-        2867.0,
+        2868.0,
         2877.0,
         2902.0,
         2929.0,
-        2927.0,
-        2917.0,
+        2929.0,
+        2916.0,
         2923.0,
         2931.0,
-        2934.0,
-        2933.0,
-        2921.0,
-        2925.0,
-        2937.0
+        2937.0,
+        2930.0,
+        2920.0,
+        2926.0,
+        2941.0,
+        2956.0
       ],
       "unemployed": [
         85.0,
@@ -280,16 +282,17 @@
         149.0,
         149.0,
         188.0,
-        184.0,
-        194.0,
-        200.0,
+        183.0,
+        193.0,
+        201.0,
         210.0,
+        201.0,
         202.0,
-        204.0,
-        204.0,
+        206.0,
         208.0,
-        227.0,
-        225.0
+        225.0,
+        223.0,
+        204.0
       ],
       "outside": [
         750.0,
@@ -359,13 +362,14 @@
         668.0,
         664.0,
         664.0,
-        662.0,
+        663.0,
         668.0,
         664.0,
-        674.0,
+        675.0,
         688.0,
         668.0,
-        665.0
+        664.0,
+        662.0
       ],
       "labourForce": [
         2836.0,
@@ -429,33 +433,34 @@
         3022.0,
         3030.0,
         3041.0,
-        3016.0,
+        3017.0,
         3026.0,
         3090.0,
-        3113.0,
-        3121.0,
+        3112.0,
+        3122.0,
         3117.0,
         3133.0,
-        3133.0,
-        3138.0,
-        3137.0,
-        3129.0,
-        3152.0,
-        3162.0
+        3132.0,
+        3139.0,
+        3136.0,
+        3128.0,
+        3151.0,
+        3164.0,
+        3160.0
       ],
       "kpi": {
-        "period": "2026K2",
-        "labourForce": 3162.0,
-        "employed": 2937.0
+        "period": "2026K3",
+        "labourForce": 3160.0,
+        "employed": 2956.0
       }
     },
     "ras": {
-      "period": "2024",
+      "period": "2025",
       "ageItems": [
         {
           "label": "16-64 år",
-          "employmentRate": 77.4,
-          "participationRate": 79.5
+          "employmentRate": 77.6,
+          "participationRate": 79.6
         },
         {
           "label": "16-65 år (2020 -)",
@@ -464,68 +469,68 @@
         },
         {
           "label": "16-66 år (2022 -)",
-          "employmentRate": 76.3,
-          "participationRate": 78.4
+          "employmentRate": 76.5,
+          "participationRate": 78.6
         },
         {
           "label": "16-17 år",
-          "employmentRate": 51.9,
-          "participationRate": 51.9
+          "employmentRate": 52.0,
+          "participationRate": 52.0
         },
         {
           "label": "18-19 år",
-          "employmentRate": 63.0,
-          "participationRate": 63.2
+          "employmentRate": 63.1,
+          "participationRate": 63.6
         },
         {
           "label": "20-24 år",
-          "employmentRate": 70.4,
-          "participationRate": 71.4
+          "employmentRate": 70.8,
+          "participationRate": 72.1
         },
         {
           "label": "25-29 år",
-          "employmentRate": 76.4,
-          "participationRate": 79.7
+          "employmentRate": 76.8,
+          "participationRate": 80.1
         },
         {
           "label": "30-34 år",
-          "employmentRate": 80.9,
-          "participationRate": 84.3
+          "employmentRate": 81.1,
+          "participationRate": 84.4
         },
         {
           "label": "35-39 år",
-          "employmentRate": 82.7,
-          "participationRate": 85.4
+          "employmentRate": 82.6,
+          "participationRate": 85.3
         },
         {
           "label": "40-44 år",
-          "employmentRate": 83.9,
-          "participationRate": 86.1
+          "employmentRate": 83.8,
+          "participationRate": 86.0
         },
         {
           "label": "45-49 år",
-          "employmentRate": 84.4,
-          "participationRate": 86.1
+          "employmentRate": 84.2,
+          "participationRate": 86.0
         },
         {
           "label": "50-54 år",
-          "employmentRate": 83.1,
-          "participationRate": 84.7
+          "employmentRate": 83.2,
+          "participationRate": 84.8
         },
         {
           "label": "55-59 år",
-          "employmentRate": 80.0,
-          "participationRate": 81.7
+          "employmentRate": 79.9,
+          "participationRate": 81.6
         },
         {
           "label": "60-64 år",
-          "employmentRate": 70.7,
-          "participationRate": 72.6
+          "employmentRate": 71.3,
+          "participationRate": 73.2
         },
         {
           "label": "65-66 år",
-          "employmentRate": 45.8,
-          "participationRate": 47.1
+          "employmentRate": 47.9,
+          "participationRate": 49.4
         }
       ],
       "labels": [
@@ -545,7 +550,8 @@
         "2021",
         "2022",
         "2023",
-        "2024"
+        "2024",
+        "2025"
       ],
       "focus": [
         {
@@ -565,6 +571,7 @@
             0.0,
             73.9,
             76.5,
+            0.0,
             0.0,
             0.0,
             0.0
@@ -589,7 +596,8 @@
             80.1,
             80.5,
             80.2,
-            80.0
+            80.0,
+            79.9
           ]
         },
         {
@@ -611,7 +619,8 @@
             67.2,
             68.8,
             70.2,
-            70.7
+            70.7,
+            71.3
           ]
         },
         {
@@ -633,13 +642,14 @@
             0.0,
             41.4,
             43.6,
-            45.8
+            45.8,
+            47.9
           ]
         }
       ],
       "kpi": {
-        "employmentRate": 76.3,
-        "participationRate": 78.4
+        "employmentRate": 76.5,
+        "participationRate": 78.6
       }
     },
     "employees": {
